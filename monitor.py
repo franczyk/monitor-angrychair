@@ -5,7 +5,7 @@ import boto3
 
 sns = boto3.client('sns')
 
-def monitor_formichelle(event, context):
+def monitor_angrychair(event, context):
 
     blog = "shop.angrychairbrewing.com/product-category/beers/"
     
