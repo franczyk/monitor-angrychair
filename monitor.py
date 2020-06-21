@@ -2,6 +2,7 @@ import random
 import urllib
 import re
 import boto3
+import botocore
 
 sns = boto3.client('sns')
 
@@ -17,7 +18,7 @@ def monitor_angrychair(event, context):
     myfile = myfile[:50000]
     encoded_string = myfile.encode("utf-8")
     
-    bucket_name = "bdsmlr-tracker"
+    bucket_name = "tracker"
     file_name =  "angrychair.txt"
     s3_path = file_name
     try:
@@ -25,7 +26,7 @@ def monitor_angrychair(event, context):
         lastpage_content = ""
         lastpage = client.get_object(Bucket=bucket_name, Key=s3_path)
         lastpage_content = lastpage['Body'].read()
-    except ClientError as e:
+    except botocore.exceptions.ClientError as e:
         error_code = e.response["Error"]["Code"]
         if error_code == "NoSuchKey":
             lastpage_content = "file did not exist"
