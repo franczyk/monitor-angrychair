@@ -1,5 +1,6 @@
 import random
-import urllib
+#import urllib
+import urllib2
 import re
 import boto3
 import botocore
@@ -8,13 +9,15 @@ sns = boto3.client('sns')
 
 def monitor_angrychair(event, context):
 
-    url = "http://shop.angrychairbrewing.com/product-category/beers/"
+    url = "https://shop.angrychairbrewing.com/product-category/beers/"
     snsUrn = 'arn:aws:sns:us-east-1:619096257283:monitor-angrychair'
     bucket_name = "your-bucket"
     file_name =  "angrychair.txt"
 
+    req = urllib2.Request(url)
     myfile = ""
-    myfile = urllib.urlopen(url).read()
+    req.add_header("User-Agent", "Mozilla/5.0 (Windows NT 6.0; WOW64; rv:24.0) Gecko/20100101 Firefox/24.0")
+    myfile = urllib2.urlopen(req).read()
 
     myfile = myfile[:50000]
     encoded_string = myfile.encode("utf-8")
@@ -33,12 +36,11 @@ def monitor_angrychair(event, context):
 
     try:
         if lastpage_content == encoded_string:
-            returnvalue = "This is the same"
+            returnvalue = "This is the same. " + myfile[:100]
         else:
             returnvalue = "This has changed."
             s3 = boto3.resource("s3")
             s3.Bucket(bucket_name).put_object(Key=s3_path, Body=encoded_string)
-            s3.Bucket(bucket_name).put_object(Key="last-" + s3_path, Body=lastpage_content)
             print("notifying sns")
             sns.publish(
                 TargetArn=snsUrn,
