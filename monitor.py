@@ -8,18 +8,18 @@ sns = boto3.client('sns')
 
 def monitor_angrychair(event, context):
 
-    blog = "shop.angrychairbrewing.com/product-category/beers/"
+    url = "shop.angrychairbrewing.com/product-category/beers/"
+    snsUrn = 'arn:aws:sns:us-east-1:619096257283:monitor-angrychair'
+    bucket_name = "your-bucket"
+    file_name =  "angrychair.txt"
 
-
-    link = "http://" + blog
+    link = "http://" + url
     myfile = ""
     myfile = urllib.urlopen(link).read()
 
     myfile = myfile[:50000]
     encoded_string = myfile.encode("utf-8")
 
-    bucket_name = "bdsmlr-tracker"
-    file_name =  "angrychair.txt"
     s3_path = file_name
     try:
         client = boto3.client('s3')
@@ -33,12 +33,6 @@ def monitor_angrychair(event, context):
             client.Bucket(bucket_name).put_object(Key=s3_path, Body=lastpage_content)
 
     try:
-        #encoded_string = re.sub(r'(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})', '', encoded_string)
-        #encoded_string = re.sub(r'ey[a-zA-Z0-9=]+', '', encoded_string)
-        #encoded_string = re.sub(r'span.*\/span', '', encoded_string)
-        #for line in encoded_string.split('\n'):
-            #if 'class="post_content' in line:
-                #encoded_string = line
         if lastpage_content == encoded_string:
             returnvalue = "This is the same"
         else:
@@ -48,9 +42,9 @@ def monitor_angrychair(event, context):
             s3.Bucket(bucket_name).put_object(Key="last-" + s3_path, Body=lastpage_content)
             print("notifying sns")
             sns.publish(
-                TargetArn='arn:aws:sns:us-east-1:619096257283:monitor-angrychair',
+                TargetArn=snsUrn,
                 Message=(
-                    'https://' + blog + ' has changed.'
+                    'https://' + url + ' has changed.'
                 )
             )
     except e:
