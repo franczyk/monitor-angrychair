@@ -8,14 +8,13 @@ sns = boto3.client('sns')
 
 def monitor_angrychair(event, context):
 
-    url = "shop.angrychairbrewing.com/product-category/beers/"
+    url = "http://shop.angrychairbrewing.com/product-category/beers/"
     snsUrn = 'arn:aws:sns:us-east-1:619096257283:monitor-angrychair'
     bucket_name = "your-bucket"
     file_name =  "angrychair.txt"
 
-    link = "http://" + url
     myfile = ""
-    myfile = urllib.urlopen(link).read()
+    myfile = urllib.urlopen(url).read()
 
     myfile = myfile[:50000]
     encoded_string = myfile.encode("utf-8")
@@ -44,7 +43,7 @@ def monitor_angrychair(event, context):
             sns.publish(
                 TargetArn=snsUrn,
                 Message=(
-                    'https://' + url + ' has changed.'
+                    url + ' has changed.'
                 )
             )
     except e:
