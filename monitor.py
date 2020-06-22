@@ -1,5 +1,4 @@
 import random
-#import urllib
 import urllib2
 import re
 import boto3
@@ -8,10 +7,9 @@ import botocore
 sns = boto3.client('sns')
 
 def monitor_angrychair(event, context):
-
-    url = "https://shop.angrychairbrewing.com/product-category/beers/"
+    url = "https://shop.angrychairbrewing.com/product-category/beers/feed/"
     snsUrn = 'arn:aws:sns:us-east-1:619096257283:monitor-angrychair'
-    bucket_name = "your-bucket"
+    bucket_name = "your-tracker"
     file_name =  "angrychair.txt"
 
     req = urllib2.Request(url)
@@ -21,7 +19,7 @@ def monitor_angrychair(event, context):
 
     myfile = myfile[:50000]
     encoded_string = myfile.encode("utf-8")
-
+    
     s3_path = file_name
     try:
         client = boto3.client('s3')
