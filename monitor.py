@@ -9,16 +9,16 @@ sns = boto3.client('sns')
 def monitor_angrychair(event, context):
 
     blog = "shop.angrychairbrewing.com/product-category/beers/"
-    
-    
-    link = "http://" + blog 
+
+
+    link = "http://" + blog
     myfile = ""
     myfile = urllib.urlopen(link).read()
-    
+
     myfile = myfile[:50000]
     encoded_string = myfile.encode("utf-8")
-    
-    bucket_name = "tracker"
+
+    bucket_name = "bdsmlr-tracker"
     file_name =  "angrychair.txt"
     s3_path = file_name
     try:
@@ -31,7 +31,7 @@ def monitor_angrychair(event, context):
         if error_code == "NoSuchKey":
             lastpage_content = "file did not exist"
             client.Bucket(bucket_name).put_object(Key=s3_path, Body=lastpage_content)
-        
+
     try:
         #encoded_string = re.sub(r'(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})', '', encoded_string)
         #encoded_string = re.sub(r'ey[a-zA-Z0-9=]+', '', encoded_string)
@@ -53,8 +53,8 @@ def monitor_angrychair(event, context):
                     'https://' + blog + ' has changed.'
                 )
             )
-    except:
-        returnvalue = "failed to get content"
+    except e:
+        returnvalue = "failed to get content" + e
 
     response = {
         'version': '1.0',
@@ -67,4 +67,3 @@ def monitor_angrychair(event, context):
     }
 
     return response
-
