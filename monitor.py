@@ -7,7 +7,9 @@ import botocore
 sns = boto3.client('sns')
 
 def monitor_angrychair(event, context):
+
     url = "https://shop.angrychairbrewing.com/product-category/beers/feed/"
+    clickable_link = "https://shop.angrychairbrewing.com/product-category/beers/"
     snsUrn = 'arn:aws:sns:us-east-1:619096257283:monitor-angrychair'
     bucket_name = "your-tracker"
     file_name =  "angrychair.txt"
@@ -19,6 +21,7 @@ def monitor_angrychair(event, context):
 
     myfile = myfile[:50000]
     encoded_string = myfile.encode("utf-8")
+    encoded_string = re.sub("lastBuildDate.*\/lastBuildDate", "", encoded_string.rstrip())
     
     s3_path = file_name
     try:
@@ -26,6 +29,9 @@ def monitor_angrychair(event, context):
         lastpage_content = ""
         lastpage = client.get_object(Bucket=bucket_name, Key=s3_path)
         lastpage_content = lastpage['Body'].read()
+        
+        lastpage_content = re.sub("lastBuildDate.*\/lastBuildDate", "", lastpage_content.rstrip())
+        
     except botocore.exceptions.ClientError as e:
         error_code = e.response["Error"]["Code"]
         if error_code == "NoSuchKey":
@@ -43,7 +49,7 @@ def monitor_angrychair(event, context):
             sns.publish(
                 TargetArn=snsUrn,
                 Message=(
-                    url + ' has changed.'
+                    clickable_link + ' has changed.'
                 )
             )
     except e:
